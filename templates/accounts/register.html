@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Echoo - Register
+{% endblock %}
+
+{% block content %}
+
+<div class="min-h-[80vh] flex items-center justify-center px-4">
+
+    <div class="card bg-base-100 shadow-xl w-full max-w-md">
+
+        <div class="card-body">
+
+            <div class="text-center mb-6">
+                <h1 class="text-3xl font-bold">
+                    Create Your Account
+                </h1>
+
+                <p class="text-base-content/60 mt-2">
+                    Join Echoo and start sharing
+                </p>
+            </div>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            Username
+                        </span>
+                    </label>
+
+                    {{ form.username }}
+
+                    {% if form.username.errors %}
+                        <p class="text-error text-sm mt-1">
+                            {{ form.username.errors|striptags }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            Email
+                        </span>
+                    </label>
+
+                    {{ form.email }}
+
+                    {% if form.email.errors %}
+                        <p class="text-error text-sm mt-1">
+                            {{ form.email.errors|striptags }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            Password
+                        </span>
+                    </label>
+
+                    {{ form.password }}
+
+                    {% if form.password.errors %}
+                        <p class="text-error text-sm mt-1">
+                            {{ form.password.errors|striptags }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div class="form-control mb-6">
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            Confirm Password
+                        </span>
+                    </label>
+
+                    {{ form.confirm_password }}
+
+                    {% if form.confirm_password.errors %}
+                        <p class="text-error text-sm mt-1">
+                            {{ form.confirm_password.errors|striptags }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-error mb-4">
+                        <span>
+                            {{ form.non_field_errors|striptags }}
+                        </span>
+                    </div>
+                {% endif %}
+
+                <button
+                    type="submit"
+                    class="btn btn-primary w-full"
+                >
+                    Create Account
+                </button>
+
+            </form>
+
+            <div class="divider">OR</div>
+
+            <p class="text-center text-sm">
+                Already have an account?
+                <a
+                    href="{% url 'login' %}"
+                    class="link link-primary font-semibold"
+                >
+                    Login
+                </a>
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

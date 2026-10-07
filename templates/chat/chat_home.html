@@ -1,0 +1,456 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Echoo - Messages
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-6xl mx-auto px-4 py-6">
+
+    <div class="card bg-base-100 shadow-xl overflow-hidden">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 min-h-[650px]">
+
+            <!-- LEFT: INBOX -->
+            <div class="border-r border-base-300 flex flex-col">
+
+                <!-- HEADER -->
+                <div class="p-5 border-b border-base-300">
+
+                    <div class="flex items-center justify-between">
+
+                        <div>
+                            <h1 class="text-2xl font-bold">
+                                Messages
+                            </h1>
+
+                            <p class="text-sm text-base-content/60">
+                                Chat with your connections
+                            </p>
+                        </div>
+
+                        <div class="text-2xl">
+                            💬
+                        </div>
+
+                    </div>
+
+
+                    <!-- SEARCH -->
+                    <div class="mt-4">
+
+                        <input
+                            type="text"
+                            id="conversation-search"
+                            placeholder="Search conversations..."
+                            class="input input-bordered w-full"
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- CONVERSATION LIST -->
+                <div
+                    id="conversation-list"
+                    class="flex-1 overflow-y-auto"
+                >
+
+                    <!-- EXISTING CONVERSATIONS -->
+
+                    {% for conversation in conversations %}
+
+                        {% for participant in conversation.participants.all %}
+
+                            {% if participant != user %}
+
+                                <a
+                                    href="{% url 'conversation' participant.id %}"
+                                    class="conversation-item flex items-center gap-3 p-4 hover:bg-base-200 transition"
+                                    data-username="{{ participant.username|lower }}"
+                                >
+
+                                    <!-- AVATAR -->
+
+                                    {% if participant.profile.avatar %}
+
+                                        <div class="avatar">
+
+                                            <div class="w-12 rounded-full">
+
+                                                <img
+                                                    src="{{ participant.profile.avatar.url }}"
+                                                    alt="{{ participant.username }}"
+                                                >
+
+                                            </div>
+
+                                        </div>
+
+                                    {% else %}
+
+                                        <div class="avatar placeholder">
+
+                                            <div class="bg-primary text-primary-content w-12 rounded-full">
+
+                                                <span class="text-lg font-bold">
+                                                    {{ participant.username|first|upper }}
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                    {% endif %}
+
+
+                                    <!-- USER INFORMATION -->
+
+                                    <div class="flex-1 min-w-0">
+
+                                        <!-- USERNAME + TIME -->
+
+                                        <div class="flex justify-between items-center gap-2">
+
+                                            <h2 class="font-semibold truncate">
+                                                {{ participant.username }}
+                                            </h2>
+
+
+                                            {% with last_message=conversation.messages.last %}
+
+                                                {% if last_message %}
+
+                                                    <span class="text-xs text-base-content/40 whitespace-nowrap">
+
+                                                        {{ last_message.created_at|date:"H:i" }}
+
+                                                    </span>
+
+                                                {% endif %}
+
+                                            {% endwith %}
+
+                                        </div>
+
+
+                                        <!-- LAST MESSAGE + UNREAD COUNT -->
+
+                                        <div class="flex items-center justify-between gap-2">
+
+                                            {% with last_message=conversation.messages.last %}
+
+                                                {% if last_message %}
+
+                                                    <p class="text-sm text-base-content/50 truncate">
+
+                                                        {% if last_message.sender == user %}
+                                                            You:
+                                                        {% endif %}
+
+                                                        {{ last_message.text }}
+
+                                                    </p>
+
+                                                {% else %}
+
+                                                    <p class="text-sm text-base-content/50 truncate">
+                                                        Start a conversation
+                                                    </p>
+
+                                                {% endif %}
+
+                                            {% endwith %}
+
+
+                                            <!-- UNREAD COUNT -->
+
+                                            {% if conversation.unread_count > 0 %}
+
+                                                <span class="badge badge-primary badge-sm shrink-0">
+
+                                                    {{ conversation.unread_count }}
+
+                                                </span>
+
+                                            {% endif %}
+
+                                        </div>
+
+                                    </div>
+
+                                </a>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                    {% endfor %}
+
+
+                    <!-- PEOPLE YOU FOLLOW WITHOUT A CONVERSATION -->
+
+                    {% for profile in following %}
+
+                        <a
+                            href="{% url 'conversation' profile.user.id %}"
+                            class="conversation-item flex items-center gap-3 p-4 hover:bg-base-200 transition"
+                            data-username="{{ profile.user.username|lower }}"
+                        >
+
+                            <!-- AVATAR -->
+
+                            {% if profile.avatar %}
+
+                                <div class="avatar">
+
+                                    <div class="w-12 rounded-full">
+
+                                        <img
+                                            src="{{ profile.avatar.url }}"
+                                            alt="{{ profile.user.username }}"
+                                        >
+
+                                    </div>
+
+                                </div>
+
+                            {% else %}
+
+                                <div class="avatar placeholder">
+
+                                    <div class="bg-primary text-primary-content w-12 rounded-full">
+
+                                        <span class="text-lg font-bold">
+                                            {{ profile.user.username|first|upper }}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            {% endif %}
+
+
+                            <!-- USER INFORMATION -->
+
+                            <div class="flex-1 min-w-0">
+
+                                <h2 class="font-semibold truncate">
+                                    {{ profile.user.username }}
+                                </h2>
+
+                                <p class="text-sm text-base-content/50 truncate">
+                                    Start a conversation
+                                </p>
+
+                            </div>
+
+                        </a>
+
+                    {% empty %}
+
+                        {% if not conversations %}
+
+                            <div class="p-8 text-center">
+
+                                <div class="text-5xl mb-4">
+                                    👥
+                                </div>
+
+                                <h2 class="font-semibold text-lg">
+                                    No connections yet
+                                </h2>
+
+                                <p class="text-sm text-base-content/60 mt-2">
+                                    Follow someone to start chatting with them.
+                                </p>
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+
+                    <!-- NO SEARCH RESULTS -->
+
+                    <div
+                        id="no-search-results"
+                        class="hidden p-8 text-center"
+                    >
+
+                        <div class="text-5xl mb-4">
+                            🔍
+                        </div>
+
+                        <h2 class="font-semibold text-lg">
+                            No users found
+                        </h2>
+
+                        <p class="text-sm text-base-content/60 mt-2">
+                            Try searching for another username.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- RIGHT: EMPTY CHAT AREA -->
+
+            <div class="md:col-span-2 flex flex-col">
+
+                <!-- CHAT HEADER -->
+
+                <div class="p-5 border-b border-base-300 flex items-center gap-3">
+
+                    <div class="avatar placeholder">
+
+                        <div class="bg-neutral text-neutral-content w-11 rounded-full">
+
+                            <span>
+                                💬
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        <h2 class="font-bold">
+                            Select a conversation
+                        </h2>
+
+                        <p class="text-sm text-base-content/50">
+                            Your messages will appear here
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- EMPTY STATE -->
+
+                <div class="flex-1 p-6 overflow-y-auto bg-base-200/40">
+
+                    <div class="h-full flex flex-col items-center justify-center text-center">
+
+                        <div class="text-6xl mb-5">
+                            💬
+                        </div>
+
+                        <h2 class="text-2xl font-bold">
+                            Your conversations
+                        </h2>
+
+                        <p class="text-base-content/60 mt-2 max-w-md">
+                            Select someone from your connections to start
+                            a private conversation on Echoo.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DISABLED INPUT -->
+
+                <div class="p-4 border-t border-base-300">
+
+                    <div class="flex items-center gap-3">
+
+                        <input
+                            type="text"
+                            placeholder="Select a conversation first..."
+                            class="input input-bordered flex-1"
+                            disabled
+                        >
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            disabled
+                        >
+                            Send
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- SEARCH SCRIPT -->
+
+<script>
+
+    const searchInput =
+        document.getElementById("conversation-search");
+
+    const conversationItems =
+        document.querySelectorAll(".conversation-item");
+
+    const noSearchResults =
+        document.getElementById("no-search-results");
+
+
+    searchInput.addEventListener("input", function () {
+
+        const searchTerm =
+            searchInput.value.toLowerCase().trim();
+
+        let visibleItems = 0;
+
+
+        conversationItems.forEach(function (item) {
+
+            const username =
+                item.dataset.username;
+
+
+            if (username.includes(searchTerm)) {
+
+                item.classList.remove("hidden");
+
+                visibleItems++;
+
+            } else {
+
+                item.classList.add("hidden");
+
+            }
+
+        });
+
+
+        if (visibleItems === 0 && searchTerm !== "") {
+
+            noSearchResults.classList.remove("hidden");
+
+        } else {
+
+            noSearchResults.classList.add("hidden");
+
+        }
+
+    });
+
+</script>
+
+{% endblock %}

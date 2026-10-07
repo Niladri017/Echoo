@@ -1,0 +1,473 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Echoo - Chat with {{ other_user.username }}
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-6xl mx-auto px-4 py-6">
+
+    <div class="card bg-base-100 shadow-xl overflow-hidden">
+
+        <div class="flex flex-col min-h-[700px]">
+
+            <!-- CHAT HEADER -->
+            <div class="p-4 border-b border-base-300 flex items-center gap-4">
+
+                <a
+                    href="{% url 'chat_home' %}"
+                    class="btn btn-ghost btn-sm"
+                >
+                    ←
+                </a>
+
+
+                <!-- AVATAR -->
+
+                {% if other_user.profile.avatar %}
+
+                    <div class="avatar">
+
+                        <div class="w-12 rounded-full">
+
+                            <img
+                                src="{{ other_user.profile.avatar.url }}"
+                                alt="{{ other_user.username }}"
+                            >
+
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="avatar placeholder">
+
+                        <div class="bg-primary text-primary-content w-12 rounded-full">
+
+                            <span class="text-lg font-bold">
+                                {{ other_user.username|first|upper }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- USER INFO -->
+
+                <div class="flex-1">
+
+                    <h1 class="font-bold text-lg">
+                        {{ other_user.username }}
+                    </h1>
+
+                    <p class="text-sm text-success">
+                        ● Connected
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- MESSAGES -->
+
+            <div
+                id="message-container"
+                class="flex-1 p-6 overflow-y-auto bg-base-200/40"
+            >
+
+                {% for message in conversation.messages.all %}
+
+                    {% if message.sender == user %}
+
+                        <!-- YOUR MESSAGE -->
+
+                        <div class="chat chat-end mb-3">
+
+                            <div class="chat-header text-xs opacity-60 mb-1">
+                                You
+                            </div>
+
+                            <div class="chat-bubble chat-bubble-primary">
+                                {{ message.text }}
+                            </div>
+
+                            <div class="chat-footer opacity-50 text-xs mt-1">
+                                {{ message.created_at|date:"H:i" }}
+                            </div>
+
+                        </div>
+
+                    {% else %}
+
+                        <!-- OTHER USER MESSAGE -->
+
+                        <div class="chat chat-start mb-3">
+
+                            <div class="chat-header text-xs opacity-60 mb-1">
+                                {{ message.sender.username }}
+                            </div>
+
+                            <div class="chat-bubble">
+                                {{ message.text }}
+                            </div>
+
+                            <div class="chat-footer opacity-50 text-xs mt-1">
+                                {{ message.created_at|date:"H:i" }}
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+
+                {% empty %}
+
+                    <!-- EMPTY CHAT -->
+
+                    <div class="h-full flex flex-col items-center justify-center text-center">
+
+                        <div class="text-6xl mb-4">
+                            👋
+                        </div>
+
+                        <h2 class="text-xl font-bold">
+                            Start a conversation
+                        </h2>
+
+                        <p class="text-base-content/60 mt-2">
+                            Send a message to {{ other_user.username }}.
+                        </p>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <!-- MESSAGE INPUT -->
+
+            <div class="p-4 border-t border-base-300">
+
+                <form
+                    method="POST"
+                    id="chat-form"
+                    class="flex items-center gap-3"
+                >
+
+                    {% csrf_token %}
+
+
+                    <input
+                        type="text"
+                        name="text"
+                        placeholder="Write a message..."
+                        class="input input-bordered flex-1"
+                        maxlength="2000"
+                        required
+                        autocomplete="off"
+                    >
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Send
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    console.log("CONVERSATION SCRIPT LOADED");
+
+
+    /* ==========================================
+       CONVERSATION ID
+    ========================================== */
+
+    const conversationId =
+        "{{ conversation.id }}";
+
+
+    /* ==========================================
+       WEBSOCKET CONNECTION
+    ========================================== */
+
+    const chatSocket = new WebSocket(
+        "ws://" +
+        window.location.host +
+        "/ws/chat/" +
+        conversationId +
+        "/"
+    );
+
+
+    /* ==========================================
+       CHAT FORM
+    ========================================== */
+
+    const chatForm =
+        document.getElementById("chat-form");
+
+
+    chatForm.addEventListener("submit", function (event) {
+
+        event.preventDefault();
+
+
+        const input =
+            chatForm.querySelector(
+                'input[name="text"]'
+            );
+
+
+        const message =
+            input.value.trim();
+
+
+        if (message !== "") {
+
+            chatSocket.send(
+                JSON.stringify({
+                    message: message
+                })
+            );
+
+
+            input.value = "";
+
+        }
+
+    });
+
+
+    /* ==========================================
+       WEBSOCKET CONNECTED
+    ========================================== */
+
+    chatSocket.onopen = function () {
+
+        console.log(
+            "WebSocket connected!"
+        );
+
+    };
+
+
+    /* ==========================================
+       RECEIVE MESSAGE
+    ========================================== */
+
+    chatSocket.onmessage = function (event) {
+
+        const data =
+            JSON.parse(event.data);
+
+
+        console.log(
+            "New message:",
+            data.message
+        );
+
+
+        console.log(
+            "Sender:",
+            data.sender
+        );
+
+
+        console.log(
+            "Time:",
+            data.created_at
+        );
+
+
+        const messageContainer =
+            document.getElementById(
+                "message-container"
+            );
+
+
+        const messageDiv =
+            document.createElement(
+                "div"
+            );
+
+
+        const currentUsername =
+            "{{ user.username }}";
+
+
+        /* ==========================================
+           CREATE MESSAGE ELEMENTS
+        ========================================== */
+
+        const header =
+            document.createElement(
+                "div"
+            );
+
+
+        const bubble =
+            document.createElement(
+                "div"
+            );
+
+
+        const footer =
+            document.createElement(
+                "div"
+            );
+
+
+        /* ==========================================
+           YOUR MESSAGE
+        ========================================== */
+
+        if (
+            data.sender ===
+            currentUsername
+        ) {
+
+            messageDiv.className =
+                "chat chat-end mb-3";
+
+
+            header.className =
+                "chat-header text-xs opacity-60 mb-1";
+
+
+            header.textContent =
+                "You";
+
+
+            bubble.className =
+                "chat-bubble chat-bubble-primary";
+
+
+            /*
+             * SECURITY:
+             * Use textContent instead of innerHTML.
+             */
+
+            bubble.textContent =
+                data.message;
+
+
+            footer.className =
+                "chat-footer opacity-50 text-xs mt-1";
+
+
+            footer.textContent =
+                data.created_at;
+
+        }
+
+
+        /* ==========================================
+           OTHER USER MESSAGE
+        ========================================== */
+
+        else {
+
+            messageDiv.className =
+                "chat chat-start mb-3";
+
+
+            header.className =
+                "chat-header text-xs opacity-60 mb-1";
+
+
+            header.textContent =
+                data.sender;
+
+
+            bubble.className =
+                "chat-bubble";
+
+
+            /*
+             * SECURITY:
+             * Use textContent instead of innerHTML.
+             */
+
+            bubble.textContent =
+                data.message;
+
+
+            footer.className =
+                "chat-footer opacity-50 text-xs mt-1";
+
+
+            footer.textContent =
+                data.created_at;
+
+        }
+
+
+        /* ==========================================
+           ADD MESSAGE TO CHAT
+        ========================================== */
+
+        messageDiv.appendChild(
+            header
+        );
+
+
+        messageDiv.appendChild(
+            bubble
+        );
+
+
+        messageDiv.appendChild(
+            footer
+        );
+
+
+        messageContainer.appendChild(
+            messageDiv
+        );
+
+
+        /* ==========================================
+           AUTO SCROLL
+        ========================================== */
+
+        messageContainer.scrollTop =
+            messageContainer.scrollHeight;
+
+    };
+
+
+    /* ==========================================
+       WEBSOCKET CLOSED
+    ========================================== */
+
+    chatSocket.onclose = function () {
+
+        console.log(
+            "WebSocket disconnected!"
+        );
+
+    };
+
+</script>
+
+{% endblock %}

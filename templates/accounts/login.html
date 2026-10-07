@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Echoo - Login
+{% endblock %}
+
+{% block content %}
+
+<div class="min-h-[80vh] flex items-center justify-center px-4">
+
+    <div class="card bg-base-100 shadow-xl w-full max-w-md">
+
+        <div class="card-body">
+
+            <div class="text-center mb-6">
+                <h1 class="text-3xl font-bold">
+                    Welcome Back
+                </h1>
+
+                <p class="text-base-content/60 mt-2">
+                    Login to your Echoo account
+                </p>
+            </div>
+
+            {% if error %}
+                <div class="alert alert-error mb-4">
+                    <span>{{ error }}</span>
+                </div>
+            {% endif %}
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            Username
+                        </span>
+                    </label>
+
+                    <input
+                        type="text"
+                        name="username"
+                        placeholder="Enter your username"
+                        class="input input-bordered w-full"
+                        required
+                    >
+                </div>
+
+                <div class="form-control mb-6">
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            Password
+                        </span>
+                    </label>
+
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        class="input input-bordered w-full"
+                        required
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary w-full"
+                >
+                    Login
+                </button>
+
+            </form>
+
+            <div class="divider">OR</div>
+
+            <p class="text-center text-sm">
+                Don't have an account?
+                <a
+                    href="{% url 'register' %}"
+                    class="link link-primary font-semibold"
+                >
+                    Create an account
+                </a>
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

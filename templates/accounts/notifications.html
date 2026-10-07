@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Echoo - Notifications
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-2xl mx-auto px-4 py-8">
+
+    <div class="card bg-base-100 shadow-md">
+
+        <div class="card-body">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+
+                <h1 class="text-2xl font-bold">
+                    Notifications
+                </h1>
+
+                <form
+                    method="POST"
+                    action="{% url 'mark_notifications_read' %}"
+                >
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="btn btn-sm btn-outline"
+                    >
+                        Mark all as read
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- Notifications -->
+            {% for notification in notifications %}
+
+                <div
+                    class="flex items-center gap-4 py-4 border-b border-base-300
+                    {% if not notification.is_read %}
+                        bg-primary/10
+                    {% endif %}"
+                >
+
+                    <!-- Avatar -->
+                    <div class="avatar">
+
+                        {% if notification.sender.profile.avatar %}
+
+                            <div class="w-12 rounded-full">
+
+                                <img
+                                    src="{{ notification.sender.profile.avatar.url }}"
+                                    alt="{{ notification.sender.username }}"
+                                >
+
+                            </div>
+
+                        {% else %}
+
+                            <div
+                                class="bg-neutral text-neutral-content w-12 rounded-full flex items-center justify-center"
+                            >
+
+                                <span class="text-lg">
+                                    {{ notification.sender.username|first|upper }}
+                                </span>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Notification Content -->
+                    <div class="flex-1">
+
+                        <p>
+
+                            <a
+                                href="{% url 'user_profile' notification.sender.username %}"
+                                class="font-bold hover:text-primary"
+                            >
+                                {{ notification.sender.username }}
+                            </a>
+
+
+                            {% if notification.notification_type == 'like' %}
+
+                                liked your post ❤️
+
+
+                            {% elif notification.notification_type == 'comment' %}
+
+                                commented on your post 💬
+
+
+                            {% elif notification.notification_type == 'follow' %}
+
+                                started following you 👤
+
+
+                            {% elif notification.notification_type == 'message' %}
+
+                                sent you a message 💬
+
+
+                            {% endif %}
+
+                        </p>
+
+
+                        <!-- Time -->
+                        <p class="text-sm text-base-content/50 mt-1">
+                            {{ notification.created_at|timesince }} ago
+                        </p>
+
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <!-- No Notifications -->
+                <div class="text-center py-10">
+
+                    <p class="text-base-content/60">
+                        No notifications yet.
+                    </p>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

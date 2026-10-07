@@ -1,0 +1,468 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/output.css' %}"
+    >
+
+    <title>
+        {% block title %}
+            Echoo
+        {% endblock %}
+    </title>
+
+</head>
+
+
+<body class="bg-base-200 min-h-screen">
+
+
+    <!-- ==========================================
+         NAVBAR
+    =========================================== -->
+
+    <nav
+        class="navbar bg-base-100 border-b border-base-300 px-4 md:px-6 sticky top-0 z-50"
+    >
+
+
+        <!-- ==========================================
+             LOGO
+        =========================================== -->
+
+        <div class="flex-1">
+
+            <a
+                href="{% url 'home' %}"
+                class="flex items-center"
+            >
+
+                <img
+                    src="{% static 'images/echoo-logo.png' %}"
+                    alt="Echoo"
+                    class="h-12 md:h-14 w-auto"
+                >
+
+            </a>
+
+        </div>
+
+
+
+        {% if user.is_authenticated %}
+
+
+            <!-- ==========================================
+                 DESKTOP NAVIGATION
+            =========================================== -->
+
+            <div class="hidden md:flex flex-none">
+
+                <div
+                    class="flex items-center gap-2"
+                >
+
+
+                    <!-- FEED -->
+
+                    <a
+                        href="{% url 'post_list' %}"
+                        class="btn btn-ghost btn-sm"
+                    >
+                        Feed
+                    </a>
+
+
+
+                    <!-- CHAT -->
+
+                    <a
+                        href="{% url 'chat_home' %}"
+                        class="btn btn-ghost btn-sm"
+                    >
+
+                        💬 Chat
+
+                        {% if unread_messages_count > 0 %}
+
+                            <span
+                                class="badge badge-primary badge-sm"
+                            >
+                                {{ unread_messages_count }}
+                            </span>
+
+                        {% endif %}
+
+                    </a>
+
+
+
+                    <!-- NOTIFICATIONS -->
+
+                    <a
+                        href="{% url 'notifications' %}"
+                        class="btn btn-ghost btn-sm"
+                    >
+
+                        🔔 Notifications
+
+                        {% if unread_notifications_count > 0 %}
+
+                            <span
+                                class="badge badge-primary badge-sm"
+                            >
+                                {{ unread_notifications_count }}
+                            </span>
+
+                        {% endif %}
+
+                    </a>
+
+
+
+                    <!-- DESKTOP SEARCH -->
+
+                    <form
+                        method="GET"
+                        action="{% url 'search_users' %}"
+                        class="flex items-center gap-2"
+                    >
+
+                        <input
+                            type="text"
+                            name="q"
+                            placeholder="Search users..."
+                            class="input input-bordered input-sm w-40"
+                            autocomplete="off"
+                        >
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary btn-sm"
+                        >
+                            Search
+                        </button>
+
+                    </form>
+
+
+
+                    <!-- PROFILE -->
+
+                    <a
+                        href="{% url 'profile' %}"
+                        class="btn btn-ghost btn-sm"
+                    >
+                        Profile
+                    </a>
+
+
+
+                    <!-- LOGOUT -->
+
+                    <a
+                        href="{% url 'logout' %}"
+                        class="btn btn-error btn-sm"
+                    >
+                        Logout
+                    </a>
+
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==========================================
+                 MOBILE NAVIGATION
+            =========================================== -->
+
+            <div
+                class="flex md:hidden items-center gap-1"
+            >
+
+
+                <!-- MOBILE SEARCH BUTTON -->
+
+                <button
+                    type="button"
+                    id="mobile-search-button"
+                    class="btn btn-ghost btn-sm"
+                    aria-label="Search"
+                >
+                    🔍
+                </button>
+
+
+
+                <!-- MOBILE MENU -->
+
+                <details class="dropdown dropdown-end">
+
+                    <summary
+                        class="btn btn-ghost btn-sm list-none"
+                    >
+                        ☰
+                    </summary>
+
+
+                    <ul
+                        class="menu dropdown-content bg-base-100 rounded-box z-[100] mt-3 w-64 p-2 shadow-xl border border-base-300"
+                    >
+
+
+                        <!-- FEED -->
+
+                        <li>
+
+                            <a href="{% url 'post_list' %}">
+                                🏠 Feed
+                            </a>
+
+                        </li>
+
+
+
+                        <!-- CHAT -->
+
+                        <li>
+
+                            <a href="{% url 'chat_home' %}">
+
+                                💬 Chat
+
+                                {% if unread_messages_count > 0 %}
+
+                                    <span
+                                        class="badge badge-primary badge-sm ml-auto"
+                                    >
+                                        {{ unread_messages_count }}
+                                    </span>
+
+                                {% endif %}
+
+                            </a>
+
+                        </li>
+
+
+
+                        <!-- NOTIFICATIONS -->
+
+                        <li>
+
+                            <a
+                                href="{% url 'notifications' %}"
+                                class="flex items-center gap-2 whitespace-nowrap"
+                            >
+
+                                <span class="shrink-0">             
+                                    🔔
+                                </span>
+
+                                <span>
+                                    Notifications
+                                </span>
+
+                                {% if unread_notifications_count > 0 %}
+
+                                    <span class="badge badge-primary badge-sm ml-auto shrink-0">
+                                        {{ unread_notifications_count }}
+                                    </span>
+
+                                {% endif %}
+
+                            </a>
+
+                        </li>
+
+
+
+                        <!-- PROFILE -->
+
+                        <li>
+
+                            <a href="{% url 'profile' %}">
+                                👤 Profile
+                            </a>
+
+                        </li>
+
+
+
+                        <!-- LOGOUT -->
+
+                        <li>
+
+                            <a
+                                href="{% url 'logout' %}"
+                                class="text-error"
+                            >
+                                🚪 Logout
+                            </a>
+
+                        </li>
+
+
+                    </ul>
+
+                </details>
+
+
+            </div>
+
+
+        {% else %}
+
+
+            <!-- ==========================================
+                 LOGGED OUT NAVIGATION
+            =========================================== -->
+
+            <div class="flex-none">
+
+                <div class="flex items-center gap-1 md:gap-2">
+
+
+                    <!-- LOGIN -->
+
+                    <a
+                        href="{% url 'login' %}"
+                        class="btn btn-ghost btn-sm"
+                    >
+                        Login
+                    </a>
+
+
+
+                    <!-- REGISTER -->
+
+                    <a
+                        href="{% url 'register' %}"
+                        class="btn btn-primary btn-sm"
+                    >
+                        Register
+                    </a>
+
+
+                </div>
+
+            </div>
+
+
+        {% endif %}
+
+
+    </nav>
+
+
+
+    <!-- ==========================================
+         MOBILE SEARCH PANEL
+    =========================================== -->
+
+    {% if user.is_authenticated %}
+
+        <div
+            id="mobile-search-panel"
+            class="hidden md:hidden bg-base-100 border-b border-base-300 px-4 py-3"
+        >
+
+            <form
+                method="GET"
+                action="{% url 'search_users' %}"
+                class="flex items-center gap-2"
+            >
+
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search users..."
+                    class="input input-bordered input-sm flex-1"
+                    autocomplete="off"
+                >
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary btn-sm"
+                >
+                    Search
+                </button>
+
+            </form>
+
+        </div>
+
+    {% endif %}
+
+
+
+    <!-- ==========================================
+         MAIN CONTENT
+    =========================================== -->
+
+    <main>
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+
+
+    <!-- ==========================================
+         FOOTER
+    =========================================== -->
+
+    <footer
+        class="footer footer-center bg-base-100 border-t border-base-300 p-6 mt-10"
+    >
+
+        <aside>
+
+
+            <p class="font-bold text-lg text-primary">
+                Echoo
+            </p>
+
+
+            <p class="text-sm text-base-content/60">
+                Connect. Share. Echo.
+            </p>
+
+
+            <p class="text-xs text-base-content/50 mt-1">
+                © 2026 Echoo.
+            </p>
+
+
+        </aside>
+
+    </footer>
+
+
+
+    <!-- ==========================================
+         MAIN JAVASCRIPT
+    =========================================== -->
+
+    <script src="{% static 'js/main.js' %}"></script>
+
+
+</body>
+
+</html>

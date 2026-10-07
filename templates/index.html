@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Echoo - Connect. Share. Echo.
+{% endblock %}
+
+{% block content %}
+
+<div class="hero min-h-[85vh] bg-base-200">
+
+    <div class="hero-content text-center">
+
+        <div class="max-w-3xl">
+
+            <div class="mb-6">
+                <span class="badge badge-primary badge-lg">
+                    Welcome to Echoo
+                </span>
+            </div>
+
+            <h1 class="text-5xl md:text-7xl font-bold">
+                Connect.
+                <span class="text-primary">Share.</span>
+                Echo.
+            </h1>
+
+            <p class="py-8 text-lg md:text-xl text-base-content/70 max-w-2xl mx-auto">
+                A simple place to share your thoughts, discover people,
+                connect with friends, and make your voice heard.
+            </p>
+
+            {% if user.is_authenticated %}
+
+                <p class="text-lg mb-6">
+                    Welcome back,
+                    <span class="font-bold text-primary">
+                        {{ user.username }}
+                    </span>!
+                </p>
+
+                <div class="flex justify-center gap-3 flex-wrap">
+
+                    <a href="{% url 'post_list' %}"
+                       class="btn btn-primary btn-lg">
+                        Explore Echoo
+                    </a>
+
+                    <a href="{% url 'profile' %}"
+                       class="btn btn-outline btn-lg">
+                        View Profile
+                    </a>
+
+                </div>
+
+            {% else %}
+
+                <div class="flex justify-center gap-3 flex-wrap">
+
+                    <a href="{% url 'register' %}"
+                       class="btn btn-primary btn-lg">
+                        Get Started
+                    </a>
+
+                    <a href="{% url 'login' %}"
+                       class="btn btn-outline btn-lg">
+                        Login
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-16">
+
+                <div class="card bg-base-100 shadow-sm">
+                    <div class="card-body items-center text-center">
+                        <div class="text-3xl">💬</div>
+                        <h2 class="font-bold text-lg">
+                            Share
+                        </h2>
+                        <p class="text-sm text-base-content/60">
+                            Share your thoughts and moments.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card bg-base-100 shadow-sm">
+                    <div class="card-body items-center text-center">
+                        <div class="text-3xl">🤝</div>
+                        <h2 class="font-bold text-lg">
+                            Connect
+                        </h2>
+                        <p class="text-sm text-base-content/60">
+                            Find people and follow their journey.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card bg-base-100 shadow-sm">
+                    <div class="card-body items-center text-center">
+                        <div class="text-3xl">❤️</div>
+                        <h2 class="font-bold text-lg">
+                            Engage
+                        </h2>
+                        <p class="text-sm text-base-content/60">
+                            Like and comment on posts you enjoy.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
